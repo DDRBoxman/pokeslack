@@ -72,7 +72,7 @@ func sendMessage(lat, lng, pokeID string) {
 	mapURL := generateMap(lat, lng, pokeID)
 
 	message := slackmessage{
-		Text:        fmt.Sprintf("Poke found!, <%s>", mapURL),
+		Text:        fmt.Sprintf("Poke found!, <%s|Map>", mapURL),
 		UnfurlLinks: true,
 		IconURL:     getPokeIconURL(pokeID),
 	}
