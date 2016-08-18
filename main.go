@@ -64,8 +64,6 @@ func main() {
 	viper.SetConfigName("config")
 	viper.ReadInConfig()
 
-	sendMessage("30.270171", "-97.7462113", "46")
-
 	http.HandleFunc("/pokemon", handler)
 	http.ListenAndServe(":9000", nil)
 }
