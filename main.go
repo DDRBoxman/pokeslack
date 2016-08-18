@@ -36,9 +36,16 @@ type message struct {
 }
 
 type slackmessage struct {
-	Text        string `json:"text"`
-	IconURL     string `json:"icon_url"`
-	UnfurlLinks bool   `json:"unfurl_links"`
+	Text        string       `json:"text"`
+	IconURL     string       `json:"icon_url"`
+	UnfurlLinks bool         `json:"unfurl_links"`
+	Attachments []attachment `json:"attachments"`
+}
+
+type attachment struct {
+	Fallback string `json:"fallback"`
+	Pretext  string `json:"pretext"`
+	ImageURL string `json:"image_url"`
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +69,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	viper.AutomaticEnv()
 	viper.SetConfigName("config")
-	viper.ReadInConfig()
+	viper.ReadInConfig(
 
 	http.HandleFunc("/pokemon", handler)
 	http.ListenAndServe(":9000", nil)
@@ -72,9 +79,15 @@ func sendMessage(lat, lng, pokeID string) {
 	mapURL := generateMap(lat, lng, pokeID)
 
 	message := slackmessage{
-		Text:        fmt.Sprintf("Poke found!, <%s|Map>", mapURL),
 		UnfurlLinks: true,
 		IconURL:     getPokeIconURL(pokeID),
+		Attachments: []attachment{
+			attachment{
+				Fallback: "Poke found!",
+				Pretext:  "Poke found!",
+				ImageURL: mapURL,
+			},
+		},
 	}
 
 	messageString, err := json.Marshal(message)
@@ -102,6 +115,9 @@ func generateMap(lat, lng, pokeID string) string {
 	q.Set("size", "400x400")
 	q.Set("markers", fmt.Sprintf("icon:%s|%s,%s", getPokeIconURL(pokeID), lat, lng))
 	mapURL.RawQuery = q.Encode()
+
+	// warm up image cache since slack gives up really fast
+	http.Get(mapURL.String())
 
 	return mapURL.String()
 }
