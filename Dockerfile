@@ -7,4 +7,6 @@ COPY ./main.go /go/src/app
 
 RUN go get && go build
 
+EXPOSE 9000
+
 CMD ["app"]
