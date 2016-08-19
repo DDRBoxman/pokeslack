@@ -16,6 +16,7 @@ var rares = []string{
 	"9",   //blastoise
 	"64",  //kadabra
 	"65",  //alakazam
+	"113", //chansey
 	"138", //omanyte
 	"143", //snorlax
 	"149", //dragonite
