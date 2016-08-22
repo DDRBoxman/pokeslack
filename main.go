@@ -10,27 +10,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rares = []string{
-	"3",   //venasaur
-	"6",   //charizard
-	"9",   //blastoise
-	"64",  //kadabra
-	"65",  //alakazam
-	"113", //chansey
-	"138", //omanyte
-	"143", //snorlax
-	"149", //dragonite
+var rares = []int{
+	3,   //venasaur
+	6,   //charizard
+	9,   //blastoise
+	64,  //kadabra
+	65,  //alakazam
+	113, //chansey
+	138, //omanyte
+	143, //snorlax
+	149, //dragonite
 }
 
 type pokemon struct {
 	Type    string  `json:"type"`
-	Message message `json:"type"`
+	Message message `json:"message"`
 }
 
 type message struct {
 	EncounterID   string `json:"encounter_id"`
 	SpawnpointID  string `json:"spawnpoint_id"`
-	PokemonID     string `json:"pokemon_id"`
+	PokemonID     int    `json:"pokemon_id"`
 	Latitude      string `json:"latitude"`
 	Longitude     string `json:"longitude"`
 	DisappearTime string `json:"disappear_time"`
@@ -60,6 +60,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println(p)
+
 	for _, v := range rares {
 		if v == p.Message.PokemonID {
 			sendMessage(p.Message.Latitude, p.Message.Longitude, p.Message.PokemonID)
@@ -70,22 +72,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	viper.AutomaticEnv()
 	viper.SetConfigName("config")
-	viper.ReadInConfig(
+	viper.ReadInConfig()
+
+	//sendMessage("30.270171", "-97.7462113", "149")
 
 	http.HandleFunc("/pokemon", handler)
-	http.ListenAndServe(":9000", nil)
+	http.ListenAndServe(":9900", nil)
 }
 
-func sendMessage(lat, lng, pokeID string) {
+func sendMessage(lat, lng string, pokeID int) {
 	mapURL := generateMap(lat, lng, pokeID)
 
 	message := slackmessage{
+		Text:        "Poke found!",
 		UnfurlLinks: true,
 		IconURL:     getPokeIconURL(pokeID),
 		Attachments: []attachment{
 			attachment{
 				Fallback: "Poke found!",
-				Pretext:  "Poke found!",
 				ImageURL: mapURL,
 			},
 		},
@@ -103,7 +107,7 @@ func sendMessage(lat, lng, pokeID string) {
 	}
 }
 
-func generateMap(lat, lng, pokeID string) string {
+func generateMap(lat, lng string, pokeID int) string {
 	mapURL, err := url.Parse("https://maps.googleapis.com/maps/api/staticmap")
 	if err != nil {
 		return ""
@@ -123,6 +127,6 @@ func generateMap(lat, lng, pokeID string) string {
 	return mapURL.String()
 }
 
-func getPokeIconURL(pokeID string) string {
-	return viper.GetString("POKEMAP_SERVER_URL") + "static/icons/" + pokeID + ".png"
+func getPokeIconURL(pokeID int) string {
+	return fmt.Sprintf("%sstatic/icons/%d.png", viper.GetString("POKEMAP_SERVER_URL"), pokeID)
 }
