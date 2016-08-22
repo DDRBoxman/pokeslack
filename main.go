@@ -28,12 +28,9 @@ type pokemon struct {
 }
 
 type message struct {
-	EncounterID   string `json:"encounter_id"`
-	SpawnpointID  string `json:"spawnpoint_id"`
-	PokemonID     int    `json:"pokemon_id"`
-	Latitude      string `json:"latitude"`
-	Longitude     string `json:"longitude"`
-	DisappearTime string `json:"disappear_time"`
+	PokemonID int    `json:"pokemon_id"`
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
 }
 
 type slackmessage struct {
