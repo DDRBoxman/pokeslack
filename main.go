@@ -28,9 +28,9 @@ type pokemon struct {
 }
 
 type message struct {
-	PokemonID int    `json:"pokemon_id"`
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
+	PokemonID int     `json:"pokemon_id"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 type slackmessage struct {
@@ -75,7 +75,7 @@ func main() {
 	http.ListenAndServe(":9000", nil)
 }
 
-func sendMessage(lat, lng string, pokeID int) {
+func sendMessage(lat, lng float64, pokeID int) {
 	mapURL := generateMap(lat, lng, pokeID)
 
 	message := slackmessage{
@@ -102,7 +102,7 @@ func sendMessage(lat, lng string, pokeID int) {
 	}
 }
 
-func generateMap(lat, lng string, pokeID int) string {
+func generateMap(lat, lng float64, pokeID int) string {
 	mapURL, err := url.Parse("https://maps.googleapis.com/maps/api/staticmap")
 	if err != nil {
 		return ""
@@ -111,9 +111,9 @@ func generateMap(lat, lng string, pokeID int) string {
 	q := mapURL.Query()
 	q.Set("zoom", "15")
 	q.Set("key", viper.GetString("GOOGLE_MAPS_KEY"))
-	q.Set("center", lat+","+lng)
+	q.Set("center", fmt.Sprintf("%f,%f", lat, lng))
 	q.Set("size", "400x400")
-	q.Set("markers", fmt.Sprintf("icon:%s|%s,%s", getPokeIconURL(pokeID), lat, lng))
+	q.Set("markers", fmt.Sprintf("icon:%s|%f,%f", getPokeIconURL(pokeID), lat, lng))
 	mapURL.RawQuery = q.Encode()
 
 	// warm up image cache since slack gives up really fast
