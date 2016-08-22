@@ -74,10 +74,8 @@ func main() {
 	viper.SetConfigName("config")
 	viper.ReadInConfig()
 
-	//sendMessage("30.270171", "-97.7462113", "149")
-
 	http.HandleFunc("/pokemon", handler)
-	http.ListenAndServe(":9900", nil)
+	http.ListenAndServe(":9000", nil)
 }
 
 func sendMessage(lat, lng string, pokeID int) {
